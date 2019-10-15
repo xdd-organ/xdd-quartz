@@ -1,5 +1,7 @@
 package com.java.xdd.quartz.config;
 
+import com.java.xdd.quartz.listen.QuartListen;
+import com.java.xdd.quartz.listen.QuartzJobListener;
 import org.quartz.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +27,18 @@ public class QuartzConfig {
 
     @Autowired
     private SpringJobFactory springJobFactory;
+    @Autowired
+    private QuartListen quartListen;
+    @Autowired
+    private QuartzJobListener quartzJobListener;
 
     @Bean
     public SchedulerFactoryBean schedulerFactoryBean() {
         SchedulerFactoryBean bean = new SchedulerFactoryBean();
         bean.setTaskExecutor(initQuartzExecutor());//设置线程池
         bean.setStartupDelay(5);//延时启动 秒
-
+        bean.setSchedulerListeners(quartListen);//监听器
+        bean.setGlobalJobListeners(quartzJobListener);
         bean.setJobFactory(springJobFactory);//使spring注入有效
         return bean;
     }

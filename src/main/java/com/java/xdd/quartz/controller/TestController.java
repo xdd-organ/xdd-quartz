@@ -3,11 +3,12 @@ package com.java.xdd.quartz.controller;
 import com.java.xdd.quartz.test1.TestJob;
 import org.quartz.*;
 import org.quartz.ee.servlet.QuartzInitializerListener;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
+import java.util.*;
 
 /**
  * @author xdd
@@ -33,11 +34,28 @@ public class TestController {
         TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroup);
         Trigger trigger = TriggerBuilder.newTrigger() //触发器
                 .withIdentity(triggerKey)
-                .startAt(new Date()) //开始时间
+                .startAt(new Date(new Date().getTime() + 5000)) //开始时间
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInSeconds(1) //指定一个重复间隔,以秒/分/小时为单位。
                         .withRepeatCount(10)) //指定反复的次数
                 .build();
         scheduler.scheduleJob(job, trigger); //开始任务
+    }
+
+    @RequestMapping("getAll")
+    public Object getAll() throws Exception{
+        List<String> jobGroupNames = scheduler.getJobGroupNames();
+
+        Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.<JobKey>anyGroup());//获取所有jobKey
+//        JobDetail jobDetail = scheduler.getJobDetail(new JobKey(null, jobGroupNames.get(0)));
+
+        ArrayList<JobDetail> res = new ArrayList<>();
+        Iterator<JobKey> iterator = jobKeys.iterator();
+        while (iterator.hasNext()) {
+            res.add(scheduler.getJobDetail(iterator.next()));//获取指定job
+        }
+
+        List<JobExecutionContext> currentlyExecutingJobs = scheduler.getCurrentlyExecutingJobs();
+        return res;
     }
 }
