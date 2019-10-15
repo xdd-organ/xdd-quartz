@@ -4,6 +4,7 @@ import org.quartz.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskDecorator;
@@ -22,11 +23,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class QuartzConfig {
     private Logger logger = LoggerFactory.getLogger(QuartzConfig.class);
 
+    @Autowired
+    private SpringJobFactory springJobFactory;
+
     @Bean
     public SchedulerFactoryBean schedulerFactoryBean() {
         SchedulerFactoryBean bean = new SchedulerFactoryBean();
         bean.setTaskExecutor(initQuartzExecutor());//设置线程池
         bean.setStartupDelay(5);//延时启动 秒
+
+        bean.setJobFactory(springJobFactory);//使spring注入有效
         return bean;
     }
 
