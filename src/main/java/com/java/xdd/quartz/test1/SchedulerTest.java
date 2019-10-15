@@ -6,6 +6,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.triggers.CronTriggerImpl;
 import org.quartz.impl.triggers.SimpleTriggerImpl;
 import org.quartz.spi.MutableTrigger;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import java.util.Date;
 
@@ -75,5 +76,8 @@ public class SchedulerTest {
         Thread.sleep(5000);
 
         scheduler.shutdown();
+    }
+
+    public void test3() {
     }
 }
