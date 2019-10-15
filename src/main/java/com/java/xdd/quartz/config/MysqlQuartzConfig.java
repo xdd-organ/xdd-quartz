@@ -10,10 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskDecorator;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -21,9 +23,9 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author xdd
  * @date 2019/10/15
  */
-//@Configuration
-public class QuartzConfig {
-    private Logger logger = LoggerFactory.getLogger(QuartzConfig.class);
+@Configuration
+public class MysqlQuartzConfig {
+    private Logger logger = LoggerFactory.getLogger(MysqlQuartzConfig.class);
 
     @Autowired
     private SpringJobFactory springJobFactory;
@@ -40,7 +42,29 @@ public class QuartzConfig {
         bean.setSchedulerListeners(quartListen);//监听器
         bean.setGlobalJobListeners(quartzJobListener);
         bean.setJobFactory(springJobFactory);//使spring注入有效
+
+        bean.setDataSource(driverManagerDataSource());
+        bean.setQuartzProperties(properties());//如果持久化使用数据库连接
         return bean;
+    }
+
+    @Bean
+    public Properties properties() {
+        Properties properties = new Properties();
+        properties.put("org.quartz.jobStore.class", "org.quartz.impl.jdbcjobstore.JobStoreTX");
+        properties.put("org.quartz.jobStore.tablePrefix", "QRTZ_");
+        properties.put("org.quartz.jobStore.dataSource", "myDatasource");
+        return properties;
+    }
+
+    @Bean
+    public DriverManagerDataSource driverManagerDataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://127.0.0.1:3306/quartz");
+        dataSource.setUsername("root");
+        dataSource.setPassword("root");
+        return dataSource;
     }
 
     @Bean
